@@ -1,7 +1,7 @@
-import react, { useState} from 'react';
+import { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { db } from './src/config/firebaseconfig';
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc, getDoc, updateDoc, deleteDoc, deleteField } from "firebase/firestore";
 
 
 const App = () => {
@@ -10,8 +10,10 @@ const App = () => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
+  // Create
   const adicionar = () => {
     addDoc(collection(db, "usuarios"), 
+    //setDoc(doc(db, "usuarios", '1'),
     {
       nome: nome,
       email: email,
@@ -21,16 +23,54 @@ const App = () => {
       console.log("Usuário cadastrado com sucesso!")
     })
     .catch(error => {
-      setNome('');
-      setEmail('');
-      setSenha('');
       console.log(error);
-  })}
+  })
+  setNome('');
+  setEmail('');
+  setSenha('');
+}
 
+  // Read
   const ver = () => {
-    const dados = getDocs(collection(db, "usuarios"));
-    dados.forEach((doc) => { // ERRO AQUI
-      console.log(`${doc.id} => ${doc.data()}`);
+    const docRef = doc(db, "usuarios", "1");
+    const dados = getDoc(docRef)
+    .then((doc) => {
+      if (doc.exists) {
+        console.log("Dados: ", doc.data())
+      } else {
+        console.log("Erro");
+    }})
+    .catch(error => {
+      console.log(error);
+    })
+  }
+
+  // Update
+  const atualizar = () => {
+    updateDoc(doc(db, "usuarios", '1'), 
+    {
+      senha: senha
+    })
+    .then( () => {
+      console.log("Atualizado com sucesso!")
+    })
+    .catch(error => {
+      console.log(error);
+    })
+  }
+
+  // Delete
+  const deletar = () => {
+    deleteDoc(doc(db, "usuarios", '70kUE60Zcdx9GfU2OnpJ'))
+    //const ref = doc(db, "usuarios", "YHRcL6My4BjH97388g1u");
+    //updateDoc(ref, {
+      //email: deleteField()
+    //})
+    .then( () => {
+      console.log("Deletado  com sucesso!")
+    })
+    .catch(error => {
+      console.log(error);
     })
   }
 
@@ -62,6 +102,16 @@ const App = () => {
         style={styles.button}
         onPress={ver}>
             <Text style={styles.textButton}>Ver dados</Text>
+      </TouchableOpacity>  
+      <TouchableOpacity
+        style={styles.button}
+        onPress={atualizar}>
+            <Text style={styles.textButton}>Atualizar</Text>
+      </TouchableOpacity>  
+      <TouchableOpacity
+        style={styles.button}
+        onPress={deletar}>
+            <Text style={styles.textButton}>Deletar</Text>
       </TouchableOpacity>  
     </View>
   );
